@@ -1,0 +1,66 @@
+@page "/login"
+
+@using System.ComponentModel.DataAnnotations;
+@using Blazored.LocalStorage
+@using POSProject.Security
+
+<LayoutView Layout="@typeof(LoginLayout)">
+    <Form Model="@model" style="min-width: 300px; margin: auto;"
+          Layout="@FormLayout.Vertical"
+          ValidateMode="@FormValidateMode.Rules"
+          LabelColSpan="8"
+          WrapperColSpan="16"
+          OnFinish="OnFinish"
+          OnFinishFailed="OnFinishFailed"
+          ValidateOnChange="true">
+        <FormItem Label="Почта" Rules=@(emailRules)>
+            <Input @bind-Value="@context.Email"/>
+        </FormItem>
+        <FormItem Label="Пароль">
+            <InputPassword @bind-Value="@context.Password"/>
+        </FormItem>
+        <FormItem>
+            <Button Type="@ButtonType.Primary" HtmlType="submit">
+                Войти
+            </Button>
+        </FormItem>
+    </Form>
+</LayoutView>
+
+@code
+{
+    [Inject]
+    private NavigationManager NavigationManager { get; set; }
+
+    [Inject]
+    private ILocalStorageService LocalStorage { get; set; }
+
+    [Inject]
+    private AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+
+    public class Model
+    {
+        [Required]
+        public string Email { get; set; }
+
+        [Required]
+        public string Password { get; set; }
+    }
+
+    private readonly Model model = new();
+
+    private FormValidationRule[] emailRules =
+    {
+        new() {Type = FormFieldType.Email, Required = true},
+    };
+
+    private async Task OnFinish()
+    {
+        await LocalStorage.SetItemAsync("token", TokenManager.GenerateToken(model.Email));
+        ((JwtAuthenticationStateProvider) AuthenticationStateProvider).NotifyStateChanged();
+    }
+
+    private void OnFinishFailed(EditContext editContext)
+    {
+    }
+}

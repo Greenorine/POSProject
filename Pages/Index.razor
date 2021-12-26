@@ -1,0 +1,10 @@
+﻿@page "/"
+@layout EmptyLayout
+<AuthorizeView>
+    <Authorized>
+        <AdminMenu></AdminMenu>
+    </Authorized>
+    <NotAuthorized>
+        <Login></Login>
+    </NotAuthorized>
+</AuthorizeView>

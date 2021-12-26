@@ -1,0 +1,130 @@
+﻿@inject OffersService OffersService
+
+<PageHeader Title="@("Партнёрские предложения")">
+    <PageHeaderExtra>
+        <Button @onclick="_ => open(false)">Добавить предложение</Button>
+    </PageHeaderExtra>
+</PageHeader>
+
+<div style="padding: 24px">
+    @foreach (var context in offers)
+    {
+        <Descriptions Title="@context.Title" Bordered>
+            <DescriptionsItem Title="Название компании">@context.CompanyName</DescriptionsItem>
+            <DescriptionsItem Title="Род деятельности">@context.Activity</DescriptionsItem>
+            <DescriptionsItem Title="Способ получения">@context.Delivery</DescriptionsItem>
+            <DescriptionsItem Title="Описание предложения">@context.Description</DescriptionsItem>
+        </Descriptions>
+        <br/>
+        <Button @onclick="_ => { Offer = (Offer)context.Clone(); open(true); }">Редактировать</Button>
+        <br/>   
+    }
+</div>
+
+<Drawer Closable="true" Width="450" Visible="visible"
+        Title='(isEdit ? "Изменение предложения" : "Добавление нового предложения")'
+        OnClose="_ => close()">
+    <Form @ref="form"
+          Model="@Offer"
+          Layout="@FormLayout.Vertical"
+          OnFinish="OnFinish"
+          OnFinishFailed="OnFinishFailed"
+          Style="width: 100%;"
+          ValidateMode="@FormValidateMode.Rules"
+          ValidateOnChange="true">
+        <FormItem Label="Название" Rules=@(baseRules)>
+            <Input @bind-Value="@context.Title"/>
+        </FormItem>
+        <FormItem Label="Название компании" Rules=@(baseRules)>
+            <Input @bind-Value="@context.CompanyName"/>
+        </FormItem>
+        <FormItem Label="Род деятельности" Rules=@(baseRules)>
+            <Input @bind-Value="@context.Activity"/>
+        </FormItem>
+        <FormItem Label="Описание" Rules=@(baseRules)>
+            <AntDesign.TextArea @bind-Value="@context.Description"/>
+        </FormItem>
+        <FormItem Label="Способ получения" Rules=@(baseRules)>
+            <AntDesign.TextArea @bind-Value="@context.Delivery"/>
+        </FormItem>
+        <FormItem>
+            <Button HtmlType="submit">@(isEdit ? "Изменить" : "Добавить")</Button>
+        </FormItem>
+    </Form>
+
+    @code {
+        private FormValidationRule[] baseRules =
+        {
+            new() {Type = FormFieldType.String, Required = true, Message = "Поле обязательно"},
+        };
+    }
+
+</Drawer>
+
+<style>
+    .ant-table,
+    .ant-table-pagination.ant-pagination {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+</style>
+
+@using System.Text.Json;
+@using AntDesign.Internal
+@using AntDesign.TableModels
+@using Newtonsoft.Json
+@using POSProject.Services
+
+@code {
+    private Offer Offer { get; set; } = new();
+
+    private ITable table;
+    private IForm form;
+    private int total = 0;
+
+    private List<Offer> offers = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        offers = await OffersService.GetAllOffersAsync();
+    }
+
+    bool visible = false;
+    bool isEdit = false;
+
+    void open(bool isEdit)
+    {
+        visible = true;
+        this.isEdit = isEdit;
+    }
+
+    void close()
+    {
+        visible = false;
+        Offer = new Offer();
+        form.Reset();
+    }
+
+    private async Task OnFinish(EditContext editContext)
+    {
+        var client = (Offer) ((Offer) editContext.Model).Clone();
+        if (!isEdit)
+        {
+            await OffersService.InsertOfferAsync(client);
+            offers.Add(client);
+        }
+        else
+        {
+            await OffersService.UpdateOfferAsync(client);
+            offers[offers.FindIndex(x => x.Id == client.Id)] = client;
+            isEdit = false;
+        }
+        close();
+        StateHasChanged();
+    }
+
+    private void OnFinishFailed(EditContext editContext)
+    {
+    }
+
+}

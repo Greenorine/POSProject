@@ -1,0 +1,49 @@
+﻿@implements IDisposable
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@layout EmptyLayout
+
+@if (PageLoaded)
+{
+    <CascadingValue TValue="Task<AuthenticationState>" Value="@_currentAuthenticationStateTask" ChildContent="@ChildContent"/>
+}
+else
+{
+    <Spin Indicator=antIcon />
+}
+
+@code {
+    private Task<AuthenticationState>? _currentAuthenticationStateTask;
+    private bool PageLoaded { get; set; }
+    RenderFragment antIcon = @<Icon Type="loading" Theme="outline" Style="font-size: 100px; margin: auto" Spin />;
+    /// <summary>
+    /// The content to which the authentication state should be provided.
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender) return;
+        
+        PageLoaded = true;
+        AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+        _currentAuthenticationStateTask = AuthenticationStateProvider
+            .GetAuthenticationStateAsync();
+        StateHasChanged();
+    }
+
+    private void OnAuthenticationStateChanged(Task<AuthenticationState> newAuthStateTask)
+    {
+        _ = InvokeAsync(() =>
+        {
+            _currentAuthenticationStateTask = newAuthStateTask;
+            StateHasChanged();
+        });
+    }
+
+    void IDisposable.Dispose()
+    {
+        AuthenticationStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+    }
+
+}

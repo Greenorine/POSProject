@@ -1,0 +1,24 @@
+﻿@using POSProject.Security
+@using System.Security.Claims
+
+<Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+    <Found Context="routeData">
+        <ModCascading>
+            <AuthorizeRouteView Authorizing="@antIcon" RouteData="@routeData" DefaultLayout="@typeof(EmptyLayout)"></AuthorizeRouteView>
+        </ModCascading>
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(EmptyLayout)">
+            <div class="m-auto">
+                <h1 class="m-auto">404</h1>
+                <h2 class="m-auto">Страница не найдена <a href="/">вернуться на главную</a></h2>
+            </div>
+        </LayoutView>
+    </NotFound>
+</Router>
+
+<AntContainer/>
+
+@code {
+    RenderFragment antIcon = @<LayoutView Layout="typeof(LoginLayout)"><Icon Type="loading" Theme="outline" Style="font-size: 100px; color:  #1b6ec2" Spin /></LayoutView>;
+}

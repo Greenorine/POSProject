@@ -1,0 +1,167 @@
+﻿@using POSProject.Services
+@inject ClientsService clientsService
+@using AntDesign.TableModels
+
+<PageHeader Title="@("Клиенты")">
+    <PageHeaderExtra>
+        <Button @onclick="_ => open(false)">Добавить клиента</Button>
+    </PageHeaderExtra>
+</PageHeader>
+
+<Table @ref="table"
+       TItem="Client"
+       DataSource="clients"
+       Total="total">
+    <Selection Key="@(context.Id.ToString())"/>
+    <Column @bind-Field="@context.FullName" Title="ФИО" Sortable/>
+    <Column @bind-Field="@context.Email" Title="Почта" Sortable/>
+    <Column @bind-Field="@context.StudentId" Title="Студенческий" Sortable/>
+    <Column @bind-Field="@context.UnionistId" Title="Проф. союзник" Sortable/>
+    <Column @bind-Field="@context.GroupId" Title="Группа" Sortable/>
+    <Column @bind-Field="@context.Institute" Title="Институт" Sortable/>
+    <ActionColumn>
+        <Button @onclick="@(e => { Client = (Client)(@context.Clone()); open(true); })">
+            <Icon Type="edit" Theme="outline"/>
+        </Button>
+    </ActionColumn>
+</Table>
+
+<Drawer Closable="true" Width="450" Visible="visible"
+        Title='(isEdit ? "Изменение клиента" : "Добавление нового клиента")'
+        OnClose="_ => close()">
+    <Form @ref="form"
+          Model="@Client"
+          Layout="@FormLayout.Vertical"
+          OnFinish="OnFinish"
+          OnFinishFailed="OnFinishFailed"
+          Style="width: 100%;"
+          ValidateMode="@FormValidateMode.Rules"
+          ValidateOnChange="true">
+        <FormItem Label="ФИО" Rules=@(baseRules)>
+            <Input @bind-Value="@context.FullName"/>
+        </FormItem>
+        <FormItem Label="Почта" Rules=@(emailRules)>
+            <Input @bind-Value="@context.Email"/>
+        </FormItem>
+        <FormItem style="margin-bottom: 0">
+            <FormItem Style="display: inline-block; width: calc(50% - 2px)" Label="Номер студенческого" Rules=@(baseRules)>
+                <Input @bind-Value="@context.StudentId"/>
+            </FormItem>
+            <FormItem Style="display: inline-block; width: calc(50% - 2px)" Label="Номер проф. союзника" Rules=@(baseRules)>
+                <Input @bind-Value="@context.UnionistId"/>
+            </FormItem>
+        </FormItem>
+        <FormItem Label="Номер группы" Rules=@(baseRules)>
+            <Input @bind-Value="@context.GroupId"/>
+        </FormItem>
+        <FormItem Label="Институт" Rules=@(baseRules)>
+            <AntDesign.TextArea @bind-Value="@context.Institute"/>
+        </FormItem>
+        <FormItem style="margin-bottom: 0">
+            <FormItem Style="display: inline-block; width: calc(50% - 2px)" Label="Баллы">
+                <AntDesign.InputNumber Style="width: 100%;" @bind-Value="@context.Coins"/>
+            </FormItem>
+            <FormItem Style="display: inline-block; width: calc(50% - 2px)" Label="Дата рождения">
+                <DatePicker Style="width: 100%;" TValue="DateTime?" Format="yyyy-MM-dd" @bind-Value="@context.BirthDay"/>
+            </FormItem>
+        </FormItem>
+        <FormItem style="margin-bottom: 0">
+            <FormItem Label="Дата вступления" Style="display: inline-block; width: calc(50% - 2px)" Rules=@(dateRules)>
+                <DatePicker Style="width: 100%;" DisabledDate="time => time > DateTime.Now" TValue="DateTime?"
+                            Format="yyyy-MM-dd" @bind-Value="@context.SubscriptionStartDate"/>
+            </FormItem>
+            <FormItem Label="Даты окончания подписки" Style="display: inline-block; width: calc(50% - 2px)" Rules=@(dateRules)>
+                <DatePicker Style="width: 100%;" DisabledDate="time => time <= DateTime.Now" TValue="DateTime?"
+                            Format="yyyy-MM-dd" @bind-Value="@context.SubscriptionEndDate"/>
+            </FormItem>
+        </FormItem>
+        <FormItem>
+            <Button HtmlType="submit">@(isEdit ? "Изменить" : "Добавить")</Button>
+        </FormItem>
+    </Form>
+
+    @code {
+
+        private FormValidationRule[] baseRules =
+        {
+            new() {Type = FormFieldType.String, Required = true, Message = "Поле обязательно"},
+        };
+
+        private FormValidationRule[] dateRules =
+        {
+            new() {Type = FormFieldType.Date, Required = true, Message = "Поле обязательно"},
+        };
+
+        private FormValidationRule[] emailRules =
+        {
+            new() {Type = FormFieldType.Email, Required = true, Message = "Введите корректную почту"},
+        };
+
+    }
+
+</Drawer>
+
+<style>
+    .ant-table,
+    .ant-table-pagination.ant-pagination {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+</style>
+
+@using System.Text.Json;
+@using AntDesign.Internal
+@using Newtonsoft.Json
+
+@code {
+    private Client Client { get; set; } = new();
+
+    private ITable table;
+    private IForm form;
+    private int total = 0;
+
+    private List<Client> clients = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        clients = await clientsService.GetAllClientsAsync();
+    }
+
+    bool visible = false;
+    bool isEdit = false;
+
+    void open(bool isEdit)
+    {
+        visible = true;
+        this.isEdit = isEdit;
+    }
+
+    void close()
+    {
+        visible = false;
+        Client = new Client();
+        form.Reset();
+    }
+
+    private async Task OnFinish(EditContext editContext)
+    {
+        var client = (Client) ((Client) editContext.Model).Clone();
+        if (!isEdit)
+        {
+            await clientsService.InsertClientAsync(client);
+            clients.Add(client);
+        }
+        else
+        {
+            await clientsService.UpdateClientAsync(client);
+            clients[clients.FindIndex(x => x.Id == client.Id)] = client;
+            isEdit = false;
+        }
+        close();
+        StateHasChanged();
+    }
+
+    private void OnFinishFailed(EditContext editContext)
+    {
+    }
+}
