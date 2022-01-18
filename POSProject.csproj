@@ -4,16 +4,18 @@
         <TargetFramework>net6.0</TargetFramework>
         <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
     </PropertyGroup>
-
-    <ItemGroup>
-      <Folder Include="Migrations" />
-    </ItemGroup>
-
+    
+    <PropertyGroup>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
+    </PropertyGroup>
+    
     <ItemGroup>
       <PackageReference Include="AntDesign" Version="0.10.3.1" />
+      <PackageReference Include="AutoMapper" Version="11.0.0" />
+      <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
       <PackageReference Include="Blazored.LocalStorage" Version="4.1.5" />
-      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.1" />
-      <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.1" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.1">
         <PrivateAssets>all</PrivateAssets>
@@ -27,7 +29,34 @@
       </PackageReference>
       <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.1" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.2" />
+      <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.2.3" />
+      <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.2.3" />
+      <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.2.3" />
       <PackageReference Include="Westwind.AspNetCore.LiveReload" Version="0.3.6" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Pages\Error.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\_Host.cshtml" />
+      <_ContentIncludedByDefault Remove="Pages\Index.razor" />
+      <_ContentIncludedByDefault Remove="Shared\AdminMenu.razor" />
+      <_ContentIncludedByDefault Remove="Shared\Clients.razor" />
+      <_ContentIncludedByDefault Remove="Shared\EmptyLayout.razor" />
+      <_ContentIncludedByDefault Remove="Shared\Login.razor" />
+      <_ContentIncludedByDefault Remove="Shared\LoginLayout.razor" />
+      <_ContentIncludedByDefault Remove="Shared\ModCascading.razor" />
+      <_ContentIncludedByDefault Remove="Shared\Offers.razor" />
+      <_ContentIncludedByDefault Remove="Frontend\Shared\AdminMenu.razor" />
+      <_ContentIncludedByDefault Remove="Frontend\Shared\Clients.razor" />
+      <_ContentIncludedByDefault Remove="Frontend\Shared\EmptyLayout.razor" />
+      <_ContentIncludedByDefault Remove="Frontend\Shared\Login.razor" />
+      <_ContentIncludedByDefault Remove="Frontend\Shared\LoginLayout.razor" />
+      <_ContentIncludedByDefault Remove="Frontend\Shared\ModCascading.razor" />
+      <_ContentIncludedByDefault Remove="Frontend\Shared\Offers.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Migrations" />
     </ItemGroup>
 
 </Project>

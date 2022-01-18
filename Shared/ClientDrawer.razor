@@ -1,0 +1,98 @@
+﻿@using Microsoft.AspNetCore.Components
+@using AntDesign.Internal
+<Drawer Closable="true" Width="450" Visible="@IsVisible"
+        Title='@(IsEdit ? "Изменение клиента" : "Добавление нового клиента")'
+        OnClose="OnClose">
+    <Form @ref="@form"
+          Model="@ClientModel"
+          Layout="@FormLayout.Vertical"
+          OnFinish="OnFinish"
+          Style="width: 100%;"
+          ValidateMode="@FormValidateMode.Rules"
+          ValidateOnChange="true">
+        <FormItem Label="ФИО" Rules=@(baseRules)>
+            <Input @bind-Value="@context.FullName"/>
+        </FormItem>
+        <FormItem Label="Почта" Rules=@(emailRules)>
+            <Input ReadOnly="@IsEdit" @bind-Value="@context.Email"/>
+        </FormItem>
+        <FormItem Label="Пароль" Rules=@(baseRules)>
+            <Input ReadOnly="@IsEdit" @bind-Value="@context.Password"/>
+        </FormItem>
+        <FormItem style="margin-bottom: 0">
+            <FormItem Style="display: inline-block; width: calc(50% - 2px)" Label="Номер студенческого" Rules=@(baseRules)>
+                <Input @bind-Value="@context.StudentId"/>
+            </FormItem>
+            <FormItem Style="display: inline-block; width: calc(50% - 2px)" Label="Номер проф. союзника" Rules=@(baseRules)>
+                <Input @bind-Value="@context.UnionistId"/>
+            </FormItem>
+        </FormItem>
+        <FormItem Label="Номер группы" Rules=@(baseRules)>
+            <Input @bind-Value="@context.GroupId"/>
+        </FormItem>
+        <FormItem Label="Институт" Rules=@(baseRules)>
+            <AntDesign.TextArea @bind-Value="@context.Institute"/>
+        </FormItem>
+        <FormItem style="margin-bottom: 0">
+            <FormItem Style="display: inline-block; width: calc(50% - 2px)" Label="Баллы">
+                <AntDesign.InputNumber Style="width: 100%;" @bind-Value="@context.Coins"/>
+            </FormItem>
+            <FormItem Style="display: inline-block; width: calc(50% - 2px)" Label="Дата рождения">
+                <DatePicker Style="width: 100%;" TValue="DateTime?" Format="yyyy-MM-dd" @bind-Value="@context.BirthDay"/>
+            </FormItem>
+        </FormItem>
+        <FormItem style="margin-bottom: 0">
+            <FormItem Label="Дата вступления" Style="display: inline-block; width: calc(50% - 2px)" Rules=@(dateRules)>
+                <DatePicker Style="width: 100%;" DisabledDate="time => time > DateTime.Now" TValue="DateTime?"
+                            Format="yyyy-MM-dd" @bind-Value="@context.SubscriptionStartDate"/>
+            </FormItem>
+            <FormItem Label="Даты окончания подписки" Style="display: inline-block; width: calc(50% - 2px)" Rules=@(dateRules)>
+                <DatePicker Style="width: 100%;" DisabledDate="time => time <= DateTime.Now" TValue="DateTime?"
+                            Format="yyyy-MM-dd" @bind-Value="@context.SubscriptionEndDate"/>
+            </FormItem>
+        </FormItem>
+        <FormItem>
+            <Button HtmlType="submit">@(IsEdit ? "Изменить" : "Добавить")</Button>
+        </FormItem>
+    </Form>
+
+    @code {
+        private IForm form;
+
+        [Parameter]
+        public bool IsVisible { get; set; }
+
+        [Parameter]
+        public bool IsEdit { get; set; }
+
+        [Parameter]
+        public ClientModel ClientModel { get; set; } = new();
+
+        [Parameter]
+        public EventCallback<EditContext> OnFinish { get; set; }
+
+        private FormValidationRule[] baseRules =
+        {
+            new() {Type = FormFieldType.String, Required = true, Message = "Поле обязательно"},
+        };
+
+        private FormValidationRule[] dateRules =
+        {
+            new() {Type = FormFieldType.Date, Required = true, Message = "Поле обязательно"},
+        };
+
+        private FormValidationRule[] emailRules =
+        {
+            new() {Type = FormFieldType.Email, Required = true, Message = "Введите корректную почту"},
+        };
+
+        private void OnClose()
+        {
+            IsVisible = false;
+            ClientModel = new ClientModel();
+            form.Reset();
+        }
+
+    }
+
+</Drawer>

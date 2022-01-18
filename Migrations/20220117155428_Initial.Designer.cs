@@ -5,14 +5,14 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using POSProject.DataAccess;
+using POSProject.Backend.DataAccess;
 
 #nullable disable
 
 namespace POSProject.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20211226231100_Initial")]
+    [Migration("20220117155428_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,7 +24,7 @@ namespace POSProject.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("POSProject.Models.Client", b =>
+            modelBuilder.Entity("POSProject.Backend.Models.Client", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -54,6 +54,9 @@ namespace POSProject.Migrations
                     b.Property<string>("Institute")
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -80,7 +83,7 @@ namespace POSProject.Migrations
                     b.ToTable("Clients");
                 });
 
-            modelBuilder.Entity("POSProject.Models.Offer", b =>
+            modelBuilder.Entity("POSProject.Backend.Models.Offer", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -104,6 +107,9 @@ namespace POSProject.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -116,6 +122,44 @@ namespace POSProject.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Offers");
+                });
+
+            modelBuilder.Entity("POSProject.Backend.Models.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPasswordInitial")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Roles")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
                 });
 #pragma warning restore 612, 618
         }

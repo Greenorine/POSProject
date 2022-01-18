@@ -1,6 +1,7 @@
 ﻿@page "/"
+@using POSProject.Backend.Models
 @layout EmptyLayout
-<AuthorizeView>
+<AuthorizeView Roles="@Role.Admin.ToString()">
     <Authorized>
         <AdminMenu></AdminMenu>
     </Authorized>

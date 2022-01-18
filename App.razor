@@ -1,7 +1,4 @@
-﻿@using POSProject.Security
-@using System.Security.Claims
-
-<Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+﻿<Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
     <Found Context="routeData">
         <ModCascading>
             <AuthorizeRouteView Authorizing="@antIcon" RouteData="@routeData" DefaultLayout="@typeof(EmptyLayout)"></AuthorizeRouteView>

@@ -5,21 +5,19 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using POSProject.Models;
+using POSProject.Backend.Models;
 
-namespace POSProject.DataAccess
+namespace POSProject.Backend.DataAccess
 {
     public sealed class AppDbContext : DbContext
     {
         private readonly IHttpContextAccessor httpContextAccessor;
-        private readonly ILogger<AppDbContext> logger;
 
-        public AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAccessor httpContextAccessor, ILogger<AppDbContext> logger) :
+        public AppDbContext(DbContextOptions<AppDbContext> options, IHttpContextAccessor httpContextAccessor) :
             base(options)
         {
             this.httpContextAccessor = httpContextAccessor;
-            this.logger = logger;
-            
+
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         }
 
@@ -28,7 +26,7 @@ namespace POSProject.DataAccess
             var entries = ChangeTracker
                 .Entries()
                 .Where(e => e.Entity is BaseAudit && e.State is EntityState.Added or EntityState.Modified);
-            
+
             foreach (var entityEntry in entries)
             {
                 var entity = (BaseAudit) entityEntry.Entity;
@@ -42,16 +40,17 @@ namespace POSProject.DataAccess
                     Entry(entity).Property(p => p.CreatedAt).IsModified = false;
                     Entry(entity).Property(p => p.CreatedBy).IsModified = false;
                 }
-                
+
                 entity.ModifiedAt = DateTime.UtcNow;
                 entity.ModifiedBy =
                     httpContextAccessor?.HttpContext?.User.Identity?.Name ?? "Admin";
             }
-            
+
             return await base.SaveChangesAsync(cancellationToken);
         }
 
         public DbSet<Client> Clients { get; set; }
         public DbSet<Offer> Offers { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }

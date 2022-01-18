@@ -1,10 +1,10 @@
 ﻿@implements IDisposable
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject AuthenticationStateProvider authenticationStateProvider
 @layout EmptyLayout
 
 @if (PageLoaded)
 {
-    <CascadingValue TValue="Task<AuthenticationState>" Value="@_currentAuthenticationStateTask" ChildContent="@ChildContent"/>
+    <CascadingValue TValue="Task<AuthenticationState>" Value="@currentAuthenticationStateTask" ChildContent="@ChildContent"/>
 }
 else
 {
@@ -12,22 +12,22 @@ else
 }
 
 @code {
-    private Task<AuthenticationState>? _currentAuthenticationStateTask;
+    private Task<AuthenticationState> currentAuthenticationStateTask;
     private bool PageLoaded { get; set; }
     RenderFragment antIcon = @<Icon Type="loading" Theme="outline" Style="font-size: 100px; margin: auto" Spin />;
     /// <summary>
     /// The content to which the authentication state should be provided.
     /// </summary>
     [Parameter]
-    public RenderFragment? ChildContent { get; set; }
+    public RenderFragment ChildContent { get; set; }
 
     protected override void OnAfterRender(bool firstRender)
     {
         if (!firstRender) return;
         
         PageLoaded = true;
-        AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
-        _currentAuthenticationStateTask = AuthenticationStateProvider
+        authenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+        currentAuthenticationStateTask = authenticationStateProvider
             .GetAuthenticationStateAsync();
         StateHasChanged();
     }
@@ -36,14 +36,14 @@ else
     {
         _ = InvokeAsync(() =>
         {
-            _currentAuthenticationStateTask = newAuthStateTask;
+            currentAuthenticationStateTask = newAuthStateTask;
             StateHasChanged();
         });
     }
 
     void IDisposable.Dispose()
     {
-        AuthenticationStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+        authenticationStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
     }
 
 }

@@ -1,12 +1,16 @@
-﻿@inject OffersService OffersService
+﻿@inject IDataService<Offer> OfferService
 
 <PageHeader Title="@("Партнёрские предложения")">
     <PageHeaderExtra>
-        <Button @onclick="_ => open(false)">Добавить предложение</Button>
+        <Button @onclick="_ => Open(false)">Добавить предложение</Button>
     </PageHeaderExtra>
 </PageHeader>
 
 <div style="padding: 24px">
+    @if (!offers.Any())
+    {
+        <Empty/>
+    }
     @foreach (var context in offers)
     {
         <Descriptions Title="@context.Title" Bordered>
@@ -16,14 +20,15 @@
             <DescriptionsItem Title="Описание предложения">@context.Description</DescriptionsItem>
         </Descriptions>
         <br/>
-        <Button @onclick="_ => { Offer = (Offer)context.Clone(); open(true); }">Редактировать</Button>
-        <br/>   
+        <Button @onclick="_ => { Offer = (Offer) context.Clone(); Open(true); }">Редактировать</Button>
+        <Button Danger @onclick="@(async () => await DeleteOffer(context.Id))" Style="margin-bottom: 25px;">Удалить</Button>
+        <br/>
     }
 </div>
 
 <Drawer Closable="true" Width="450" Visible="visible"
         Title='(isEdit ? "Изменение предложения" : "Добавление нового предложения")'
-        OnClose="_ => close()">
+        OnClose="_ => Close()">
     <Form @ref="form"
           Model="@Offer"
           Layout="@FormLayout.Vertical"
@@ -73,32 +78,32 @@
 @using AntDesign.Internal
 @using AntDesign.TableModels
 @using Newtonsoft.Json
-@using POSProject.Services
+@using POSProject.Backend.Models
+@using POSProject.Backend.Services
+@using POSProject.Backend.Services.Interfaces
 
 @code {
     private Offer Offer { get; set; } = new();
-
-    private ITable table;
+    
     private IForm form;
-    private int total = 0;
 
     private List<Offer> offers = new();
 
     protected override async Task OnInitializedAsync()
     {
-        offers = await OffersService.GetAllOffersAsync();
+        offers = await OfferService.GetAllAsync();
     }
 
     bool visible = false;
     bool isEdit = false;
 
-    void open(bool isEdit)
+    void Open(bool isEdit)
     {
         visible = true;
         this.isEdit = isEdit;
     }
 
-    void close()
+    void Close()
     {
         visible = false;
         Offer = new Offer();
@@ -110,21 +115,28 @@
         var client = (Offer) ((Offer) editContext.Model).Clone();
         if (!isEdit)
         {
-            await OffersService.InsertOfferAsync(client);
+            await OfferService.InsertAsync(client);
             offers.Add(client);
         }
         else
         {
-            await OffersService.UpdateOfferAsync(client);
+            await OfferService.UpdateAsync(client);
             offers[offers.FindIndex(x => x.Id == client.Id)] = client;
             isEdit = false;
         }
-        close();
+        Close();
         StateHasChanged();
     }
 
     private void OnFinishFailed(EditContext editContext)
     {
+    }
+
+    private async Task DeleteOffer(Guid id)
+    {
+        await OfferService.DeleteAsync(id);
+        offers.RemoveAll(x => x.Id == id);
+        StateHasChanged();
     }
 
 }

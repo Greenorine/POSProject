@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace POSProject.Models
+﻿namespace POSProject.Backend.Models
 {
-    public enum EActivity
+    public enum Activity
     {
         Services, // Сервисы
         FoodAndStuff, // Кафе и рестораны
